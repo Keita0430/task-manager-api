@@ -12,8 +12,8 @@ RSpec.describe Api::V1::TasksController, type: :controller do
   end
 
   describe 'POST /api/v1/tasks' do
-    let(:valid_params) { { task: { title: '数学Ⅱ・Bの宿題', description: '三角関数' } } }
-    let(:invalid_params) { { task: { title: '', description: '三角関数' } } }
+    let(:valid_params) { { task: { title: '数学Ⅱ・Bの宿題', description: '三角関数', status: :todo } } }
+    let(:invalid_params) { { task: { title: '', description: '三角関数', status: 'invalid_status' } } }
 
     context 'パラメータ有効な場合' do
       it 'タスクを作成できる' do
