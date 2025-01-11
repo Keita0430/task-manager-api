@@ -42,4 +42,42 @@ RSpec.describe Api::V1::TasksController, type: :controller do
       end
     end
   end
+
+  describe 'PATCH /api/v1/tasks/:id/status' do
+    let!(:task) { create(:task, status: :todo) }
+    let(:valid_params) { { status: 'done' } }
+    let(:invalid_params) { { status: 'invalid_status' } }
+
+    context 'パラメータが有効な場合' do
+      it 'タスクのステータスを更新できる' do
+        patch :update_status, params: { id: task.id, status: valid_params[:status] }
+        task.reload
+        expect(task.status).to eq('done')
+      end
+
+      it '200を返す' do
+        patch :update_status, params: { id: task.id, status: valid_params[:status] }
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'パラメータが無効な場合' do
+      it 'タスクのステータスを更新できない' do
+        original_status = task.status
+        patch :update_status, params: { id: task.id, status: 'invalid_status' }
+        task.reload
+        expect(task.status).to eq(original_status)
+      end
+
+      it '422を返す' do
+        patch :update_status, params: { id: task.id, status: invalid_params[:status] }
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it 'エラーを返す' do
+        patch :update_status, params: { id: task.id, status: invalid_params[:status] }
+        expect(JSON.parse(response.body)['errors']).to be_present
+      end
+    end
+  end
 end
