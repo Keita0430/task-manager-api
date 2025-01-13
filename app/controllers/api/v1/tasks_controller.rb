@@ -14,13 +14,20 @@ class Api::V1::TasksController < ApplicationController
     end
   end
 
-  def update_status
+  def update_status_and_position
     task = Task.find(params[:id])
-    if task.update(status_params)
-      render json: { task: task }, status: :ok
-    else
-      render json: { errors: task.errors.full_messages }, status: :unprocessable_entity
-    end
+    new_status = params[:status]
+    new_position = params[:position]
+
+    Task.adjust_positions_after_move(task, new_status, new_position)
+
+    render json: { task: task }, status: :ok
+  rescue ActiveRecord::RecordNotFound => e
+    render json: { errors: e.message }, status: :not_found
+  rescue ArgumentError => e
+    render json: { errors: e.message }, status: :unprocessable_entity
+  rescue StandardError => e
+    render json: { errors: "Unexpected error: #{e.message}" }, status: :internal_server_error
   end
 
   private

@@ -68,4 +68,64 @@ RSpec.describe Task, type: :model do
       end
     end
   end
+
+  describe '#adjust_positions_after_move' do
+    let!(:task1) { Task.create!(title: 'Task 1', status: :todo, position: 1) }
+    let!(:task2) { Task.create!(title: 'Task 2', status: :todo, position: 2) }
+    let!(:task3) { Task.create!(title: 'Task 3', status: :todo, position: 3) }
+
+    context '同じステータス内で順番を入れ替える場合' do
+      context '位置を大きくした場合' do
+        it '対象のタスクが指定の位置に移動し、他のタスクが正しく調整される' do
+          Task.adjust_positions_after_move(task1, 'todo', 3)
+
+          task1.reload
+          task2.reload
+          task3.reload
+
+          expect(task2.position).to eq(1)
+          expect(task3.position).to eq(2)
+          expect(task1.position).to eq(3)
+        end
+      end
+
+      context '位置を小さくした場合' do
+        it '対象のタスクが指定の位置に移動し、他のタスクが正しく調整される' do
+          Task.adjust_positions_after_move(task3, 'todo', 1)
+
+          task1.reload
+          task2.reload
+          task3.reload
+
+          expect(task3.position).to eq(1)
+          expect(task3.status).to eq('todo')
+          expect(task1.position).to eq(2)
+          expect(task2.position).to eq(3)
+        end
+      end
+    end
+
+    context '異なるステータスに移動する場合' do
+      let!(:task4) { Task.create!(title: 'Task 4', status: :in_progress, position: 1) }
+      let!(:task5) { Task.create!(title: 'Task 5', status: :in_progress, position: 2) }
+
+      it '対象のタスクが移動先ステータスの指定位置に移動し、他のタスクが正しく調整される' do
+        Task.adjust_positions_after_move(task1, 'in_progress', 2)
+
+        task1.reload
+        task2.reload
+        task3.reload
+        task4.reload
+        task5.reload
+
+        expect(task2.position).to eq(1)
+        expect(task3.position).to eq(2)
+
+        expect(task4.position).to eq(1)
+        expect(task1.position).to eq(2)
+        expect(task1.status).to eq('in_progress')
+        expect(task5.position).to eq(3)
+      end
+    end
+  end
 end
