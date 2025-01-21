@@ -14,6 +14,16 @@ class Api::V1::TasksController < ApplicationController
     end
   end
 
+  def destroy
+    task = Task.find(params[:id])
+    task.destroy
+    head :ok
+  rescue ActiveRecord::RecordNotFound => e
+    render json: { errors: e.message }, status: :not_found
+  rescue StandardError => e
+    render json: { errors: "Unexpected error: #{e.message}" }, status: :internal_server_error
+  end
+
   def update_status_and_position
     task = Task.find(params[:id])
     new_status = params[:task][:status]

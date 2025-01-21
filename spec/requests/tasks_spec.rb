@@ -43,6 +43,28 @@ RSpec.describe Api::V1::TasksController, type: :controller do
     end
   end
 
+  describe 'DELETE /api/v1/tasks/:id' do
+    let!(:task) { create(:task) }
+
+    context 'タスクが存在する場合' do
+      it 'タスクを削除できる' do
+        expect { delete :destroy, params: { id: task.id } }.to change(Task, :count).by(-1)
+      end
+
+      it '200を返す' do
+        delete :destroy, params: { id: task.id }
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'タスクが存在しない場合' do
+      it '404を返す' do
+        delete :destroy, params: { id: 0 }
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+  end
+
   describe 'PATCH /api/v1/tasks/:id/status_and_position' do
     let!(:task) { create(:task, status: :todo, position: 1) }
     let(:valid_params) { { task: { status: 'done', position: 2 } } }
