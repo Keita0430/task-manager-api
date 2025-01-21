@@ -16,8 +16,8 @@ class Api::V1::TasksController < ApplicationController
 
   def update_status_and_position
     task = Task.find(params[:id])
-    new_status = params[:status]
-    new_position = params[:position]
+    new_status = params[:task][:status]
+    new_position = params[:task][:position]
 
     Task.adjust_positions_after_move(task, new_status, new_position)
 
@@ -33,10 +33,6 @@ class Api::V1::TasksController < ApplicationController
   private
 
   def task_params
-    params.require(:task).permit(:title, :description, :status)
-  end
-
-  def status_params
-    params.permit(:status)
+    params.require(:task).permit(:title, :description, :status, :position)
   end
 end
