@@ -44,16 +44,30 @@ RSpec.describe Api::V1::TasksController, type: :controller do
   end
 
   describe 'DELETE /api/v1/tasks/:id' do
-    let!(:task) { create(:task) }
+    let!(:task1) { Task.create!(title: 'Task 1', status: :todo, position: 1) }
+    let!(:task2) { Task.create!(title: 'Task 2', status: :todo, position: 2) }
+    let!(:task3) { Task.create!(title: 'Task 3', status: :todo, position: 3) }
 
     context 'タスクが存在する場合' do
       it 'タスクを削除できる' do
-        expect { delete :destroy, params: { id: task.id } }.to change(Task, :count).by(-1)
+        expect { delete :destroy, params: { id: task1.id } }.to change(Task, :count).by(-1)
       end
 
       it '200を返す' do
-        delete :destroy, params: { id: task.id }
+        delete :destroy, params: { id: task1.id }
         expect(response).to have_http_status(:ok)
+      end
+
+      it 'タスクのリストを返す' do
+        delete :destroy, params: { id: task1.id }
+
+        json = JSON.parse(response.body, symbolize_names: true)
+
+        expect(json[:tasks].size).to eq(2)
+        expect(json[:tasks][0][:position]).to eq(1)
+        expect(json[:tasks][0][:title]).to eq(task2.title)
+        expect(json[:tasks][1][:position]).to eq(2)
+        expect(json[:tasks][1][:title]).to eq(task3.title)
       end
     end
 

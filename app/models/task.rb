@@ -43,4 +43,10 @@ class Task < ApplicationRecord
     Rails.logger.error("Position adjustment failed: #{e.message}")
     raise e
   end
+
+  def self.recalculate_positions_after_deletion(task_status, task_position)
+    Task.where(status: task_status).where("position > ?", task_position).each do |other_task|
+      other_task.update!(position: other_task.position - 1)
+    end
+  end
 end

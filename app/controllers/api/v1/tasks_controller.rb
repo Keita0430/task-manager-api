@@ -15,9 +15,19 @@ class Api::V1::TasksController < ApplicationController
   end
 
   def destroy
-    task = Task.find(params[:id])
-    task.destroy
-    head :ok
+    ActiveRecord::Base.transaction do
+      task = Task.find(params[:id])
+      task_status = task.status
+      task_position = task.position
+
+      task.destroy!
+
+      Task.recalculate_positions_after_deletion(task_status, task_position)
+
+      updated_tasks = Task.where(status: task_status).order(:position)
+
+      render json: { tasks: updated_tasks }, status: :ok
+    end
   rescue ActiveRecord::RecordNotFound => e
     render json: { errors: e.message }, status: :not_found
   rescue StandardError => e

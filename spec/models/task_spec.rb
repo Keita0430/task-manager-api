@@ -128,4 +128,22 @@ RSpec.describe Task, type: :model do
       end
     end
   end
+
+  describe '#recalculate_positions_after_deletion' do
+    let!(:task1) { Task.create!(title: 'Task 1', status: :todo, position: 1) }
+    let!(:task2) { Task.create!(title: 'Task 2', status: :todo, position: 2) }
+    let!(:task3) { Task.create!(title: 'Task 3', status: :todo, position: 3) }
+
+    context 'タスクを削除した場合　' do
+      it '同じステータスを持つタスクのポジションを再計算する' do
+        Task.recalculate_positions_after_deletion('todo', 1)
+
+        task2.reload
+        task3.reload
+
+        expect(task2.position).to eq(1)
+        expect(task3.position).to eq(2)
+      end
+    end
+  end
 end
