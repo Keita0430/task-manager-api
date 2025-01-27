@@ -120,21 +120,21 @@ RSpec.describe Api::V1::TasksController, type: :controller do
     end
   end
 
-  describe 'PATCH /api/v1/tasks/:id/status_and_position' do
+  describe 'POST /api/v1/tasks/reorder' do
     let!(:task) { create(:task, status: :todo, position: 1) }
-    let(:valid_params) { { task: { status: 'done', position: 2 } } }
-    let(:invalid_params) { { task: { status: 'invalid_status', position: 2 } } }
+    let(:valid_params) { { task: { id: task.id, status: 'done', position: 2 } } }
+    let(:invalid_params) { { task: { id: task.id, status: 'invalid_status', position: 2 } } }
 
     context 'パラメータが有効な場合' do
       it 'ステータスと位置を更新できる' do
-        patch :update_status_and_position, params: valid_params.merge(id: task.id)
+        post :reorder, params: valid_params
         task.reload
         expect(task.status).to eq('done')
         expect(task.position).to eq(2)
       end
 
       it '200を返す' do
-        patch :update_status_and_position, params: valid_params.merge(id: task.id)
+        post :reorder, params: valid_params
         expect(response).to have_http_status(:ok)
       end
     end
@@ -142,18 +142,18 @@ RSpec.describe Api::V1::TasksController, type: :controller do
     context 'パラメータが無効な場合' do
       it 'タスクのステータスを更新できない' do
         original_status = task.status
-        patch :update_status_and_position, params: invalid_params.merge(id: task.id)
+        post :reorder, params: invalid_params
         task.reload
         expect(task.status).to eq(original_status)
       end
 
       it '422を返す' do
-        patch :update_status_and_position, params: invalid_params.merge(id: task.id)
+        post :reorder, params: invalid_params
         expect(response).to have_http_status(:unprocessable_entity)
       end
 
       it 'エラーを返す' do
-        patch :update_status_and_position, params: invalid_params.merge(id: task.id)
+        post :reorder, params: invalid_params
         expect(JSON.parse(response.body)['errors']).to be_present
       end
     end

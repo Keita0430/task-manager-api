@@ -2,7 +2,9 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :tasks, only: %i[index create update destroy] do
-        patch 'status_and_position', action: 'update_status_and_position', on: :member
+        collection do
+          post 'reorder'
+        end
       end
     end
   end

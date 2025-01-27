@@ -43,14 +43,15 @@ class Api::V1::TasksController < ApplicationController
     render json: { errors: "Unexpected error: #{e.message}" }, status: :internal_server_error
   end
 
-  def update_status_and_position
-    task = Task.find(params[:id])
+  def reorder
+    task = Task.find(params[:task][:id])
     new_status = params[:task][:status]
     new_position = params[:task][:position]
 
-    Task.adjust_positions_after_move(task, new_status, new_position)
+    Task.reorder_tasks(task, new_status, new_position)
 
-    render json: { task: task }, status: :ok
+    tasks = Task.all
+    render json: { tasks: tasks }, status: :ok
   rescue ActiveRecord::RecordNotFound => e
     render json: { errors: e.message }, status: :not_found
   rescue ArgumentError => e

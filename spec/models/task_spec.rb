@@ -69,7 +69,7 @@ RSpec.describe Task, type: :model do
     end
   end
 
-  describe '#adjust_positions_after_move' do
+  describe '#reorder_tasks' do
     let!(:task1) { Task.create!(title: 'Task 1', status: :todo, position: 1) }
     let!(:task2) { Task.create!(title: 'Task 2', status: :todo, position: 2) }
     let!(:task3) { Task.create!(title: 'Task 3', status: :todo, position: 3) }
@@ -77,7 +77,7 @@ RSpec.describe Task, type: :model do
     context '同じステータス内で順番を入れ替える場合' do
       context '位置を大きくした場合' do
         it '対象のタスクが指定の位置に移動し、他のタスクが正しく調整される' do
-          Task.adjust_positions_after_move(task1, 'todo', 3)
+          Task.reorder_tasks(task1, 'todo', 3)
 
           task1.reload
           task2.reload
@@ -91,7 +91,7 @@ RSpec.describe Task, type: :model do
 
       context '位置を小さくした場合' do
         it '対象のタスクが指定の位置に移動し、他のタスクが正しく調整される' do
-          Task.adjust_positions_after_move(task3, 'todo', 1)
+          Task.reorder_tasks(task3, 'todo', 1)
 
           task1.reload
           task2.reload
@@ -110,7 +110,7 @@ RSpec.describe Task, type: :model do
       let!(:task5) { Task.create!(title: 'Task 5', status: :in_progress, position: 2) }
 
       it '対象のタスクが移動先ステータスの指定位置に移動し、他のタスクが正しく調整される' do
-        Task.adjust_positions_after_move(task1, 'in_progress', 2)
+        Task.reorder_tasks(task1, 'in_progress', 2)
 
         task1.reload
         task2.reload
