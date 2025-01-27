@@ -43,6 +43,47 @@ RSpec.describe Api::V1::TasksController, type: :controller do
     end
   end
 
+  describe 'PATCH /api/v1/tasks/:id' do
+    let!(:task) { create(:task, title: 'Old Title', description: 'Old Description', status: :todo, position: 1) }
+    let(:valid_params) { { task: { title: 'New Title', description: 'New Description', status: :done, position: 1 } } }
+    let(:invalid_params) { { task: { title: '', description: 'New Description', status: :done, position: 1 } } }
+
+    context 'パラメータ有効な場合' do
+      it 'タスクを更新できる' do
+        patch :update, params: valid_params.merge(id: task.id)
+        task.reload
+        expect(task.title).to eq('New Title')
+        expect(task.description).to eq('New Description')
+        expect(task.status).to eq('done')
+        expect(task.position).to eq(1)
+      end
+
+      it '200を返す' do
+        patch :update, params: valid_params.merge(id: task.id)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'パラメータが無効な場合' do
+      it 'タスクを更新できない' do
+        original_title = task.title
+        patch :update, params: invalid_params.merge(id: task.id)
+        task.reload
+        expect(task.title).to eq(original_title)
+      end
+
+      it '422を返す' do
+        patch :update, params: invalid_params.merge(id: task.id)
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it 'エラーを返す' do
+        patch :update, params: invalid_params.merge(id: task.id)
+        expect(JSON.parse(response.body)['errors']).to be_present
+      end
+    end
+  end
+
   describe 'DELETE /api/v1/tasks/:id' do
     let!(:task1) { Task.create!(title: 'Task 1', status: :todo, position: 1) }
     let!(:task2) { Task.create!(title: 'Task 2', status: :todo, position: 2) }
@@ -87,7 +128,6 @@ RSpec.describe Api::V1::TasksController, type: :controller do
     context 'パラメータが有効な場合' do
       it 'ステータスと位置を更新できる' do
         patch :update_status_and_position, params: valid_params.merge(id: task.id)
-        puts response.body
         task.reload
         expect(task.status).to eq('done')
         expect(task.position).to eq(2)

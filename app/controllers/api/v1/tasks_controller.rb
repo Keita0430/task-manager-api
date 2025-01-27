@@ -14,6 +14,15 @@ class Api::V1::TasksController < ApplicationController
     end
   end
 
+  def update
+    task = Task.find(params[:id])
+    if task.update(task_params)
+      render json: { task: task }, status: :ok
+    else
+      render json: { errors: task.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
   def destroy
     ActiveRecord::Base.transaction do
       task = Task.find(params[:id])
