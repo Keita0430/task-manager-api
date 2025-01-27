@@ -31,7 +31,7 @@ class Api::V1::TasksController < ApplicationController
 
       task.destroy!
 
-      Task.recalculate_positions_after_deletion(task_status, task_position)
+      Task.reorder_tasks_after_deletion(task_status, task_position)
 
       updated_tasks = Task.where(status: task_status).order(:position)
 
