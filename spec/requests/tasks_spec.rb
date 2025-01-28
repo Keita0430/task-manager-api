@@ -94,6 +94,14 @@ RSpec.describe Api::V1::TasksController, type: :controller do
         expect { delete :destroy, params: { id: task1.id } }.to change(Task, :count).by(-1)
       end
 
+      it '位置が更新される' do
+        delete :destroy, params: { id: task1.id }
+        task2.reload
+        task3.reload
+        expect(task2.position).to eq(1)
+        expect(task3.position).to eq(2)
+      end
+
       it '200を返す' do
         delete :destroy, params: { id: task1.id }
         expect(response).to have_http_status(:ok)
@@ -101,14 +109,8 @@ RSpec.describe Api::V1::TasksController, type: :controller do
 
       it 'タスクのリストを返す' do
         delete :destroy, params: { id: task1.id }
-
-        json = JSON.parse(response.body, symbolize_names: true)
-
-        expect(json[:tasks].size).to eq(2)
-        expect(json[:tasks][0][:position]).to eq(1)
-        expect(json[:tasks][0][:title]).to eq(task2.title)
-        expect(json[:tasks][1][:position]).to eq(2)
-        expect(json[:tasks][1][:title]).to eq(task3.title)
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)['tasks'].size).to eq(2)
       end
     end
 
@@ -128,7 +130,7 @@ RSpec.describe Api::V1::TasksController, type: :controller do
     let(:invalid_params) { { task: { id: task1.id, status: 'invalid_status', position: 2 } } }
 
     context 'パラメータが有効な場合' do
-      it 'ステータスと位置を更新できる' do
+      it 'ステータスと位置が更新される' do
         post :reorder, params: valid_params
         task1.reload
         task2.reload
