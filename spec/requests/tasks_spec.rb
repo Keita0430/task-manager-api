@@ -121,30 +121,42 @@ RSpec.describe Api::V1::TasksController, type: :controller do
   end
 
   describe 'POST /api/v1/tasks/reorder' do
-    let!(:task) { create(:task, status: :todo, position: 1) }
-    let(:valid_params) { { task: { id: task.id, status: 'done', position: 2 } } }
-    let(:invalid_params) { { task: { id: task.id, status: 'invalid_status', position: 2 } } }
+    let!(:task1) { create(:task, status: :todo, position: 1) }
+    let!(:task2) { create(:task, status: :todo, position: 2) }
+    let!(:task3) { create(:task, status: :todo, position: 3) }
+    let(:valid_params) { { task: { id: task1.id, status: 'done', position: 1 } } }
+    let(:invalid_params) { { task: { id: task1.id, status: 'invalid_status', position: 2 } } }
 
     context 'パラメータが有効な場合' do
       it 'ステータスと位置を更新できる' do
         post :reorder, params: valid_params
-        task.reload
-        expect(task.status).to eq('done')
-        expect(task.position).to eq(2)
+        task1.reload
+        task2.reload
+        task3.reload
+        expect(task2.position).to eq(1)
+        expect(task3.position).to eq(2)
+        expect(task1.status).to eq('done')
+        expect(task1.position).to eq(1)
       end
 
       it '200を返す' do
         post :reorder, params: valid_params
         expect(response).to have_http_status(:ok)
       end
+
+      it 'タスクのリストを返す' do
+        get :reorder, params: valid_params
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)['tasks'].size).to eq(3)
+      end
     end
 
     context 'パラメータが無効な場合' do
       it 'タスクのステータスを更新できない' do
-        original_status = task.status
+        original_status = task1.status
         post :reorder, params: invalid_params
-        task.reload
-        expect(task.status).to eq(original_status)
+        task1.reload
+        expect(task1.status).to eq(original_status)
       end
 
       it '422を返す' do
