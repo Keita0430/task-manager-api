@@ -12,7 +12,7 @@ RSpec.describe "Api::V1::Tasks::Archives", type: :request do
     end
   end
 
-  describe 'POST /api/v1/tasks/:id/archive' do
+  describe 'PATCH /api/v1/tasks/:id/archive' do
     let!(:task1) { create(:task, status: :todo, position: 1) }
     let!(:task2) { create(:task, status: :todo, position: 2) }
     let!(:task3) { create(:task, status: :todo, position: 3) }
