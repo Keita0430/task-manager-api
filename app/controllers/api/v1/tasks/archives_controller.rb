@@ -12,7 +12,7 @@ class Api::V1::Tasks::ArchivesController < ApplicationController
         Task.reorder_tasks_after_removal(task)
 
         tasks = Task.all.where(archived: false)
-        render json: tasks, status: :ok
+        render json: { tasks: tasks }, status: :ok
       else
         render json: { error: task.errors.full_messages }, status: :unprocessable_entity
       end
