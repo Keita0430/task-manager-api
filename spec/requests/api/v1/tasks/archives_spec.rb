@@ -1,6 +1,17 @@
 require 'rails_helper'
 
 RSpec.describe "Api::V1::Tasks::Archives", type: :request do
+  describe 'GET /api/v1/tasks/archived' do
+    let!(:_archived_tasks) { create_list(:task, 2, archived: true) }
+    let!(:_unarchived_task) { create(:task, archived: false) }
+
+    it 'タスクのリストを返す' do
+      get archived_api_v1_tasks_path
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)['tasks'].size).to eq(2)
+    end
+  end
+
   describe 'POST /api/v1/tasks/:id/archive' do
     let!(:task1) { create(:task, status: :todo, position: 1) }
     let!(:task2) { create(:task, status: :todo, position: 2) }

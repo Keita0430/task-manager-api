@@ -4,6 +4,7 @@ Rails.application.routes.draw do
       resources :tasks, only: %i[index create update destroy] do
         collection do
           post 'reorder'
+          get 'archived', to: 'tasks/archives#index'
         end
 
         resource :archive, only: [:update], controller: 'tasks/archives'

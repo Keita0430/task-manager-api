@@ -1,4 +1,9 @@
 class Api::V1::Tasks::ArchivesController < ApplicationController
+  def index
+    archived_tasks = Task.all.where(archived: true)
+    render json: { tasks: archived_tasks }
+  end
+
   def update
     begin
       task = Task.find(params[:task_id])
