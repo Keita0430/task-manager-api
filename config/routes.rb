@@ -5,6 +5,8 @@ Rails.application.routes.draw do
         collection do
           post 'reorder'
         end
+
+        resource :archive, only: [:update], controller: 'tasks/archives'
       end
     end
   end

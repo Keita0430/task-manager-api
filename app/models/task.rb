@@ -23,8 +23,8 @@ class Task < ApplicationRecord
     raise e
   end
 
-  def self.reorder_tasks_after_deletion(task_status, task_position)
-    Task.where(status: task_status).where("position > ?", task_position).each do |other_task|
+  def self.reorder_tasks_after_removal(task)
+    Task.where(status: task.status).where("position > ?", task.position).each do |other_task|
       other_task.update!(position: other_task.position - 1)
     end
   end

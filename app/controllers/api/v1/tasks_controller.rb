@@ -26,12 +26,10 @@ class Api::V1::TasksController < ApplicationController
   def destroy
     ActiveRecord::Base.transaction do
       task = Task.find(params[:id])
-      task_status = task.status
-      task_position = task.position
 
       task.destroy!
 
-      Task.reorder_tasks_after_deletion(task_status, task_position)
+      Task.reorder_tasks_after_removal(task)
 
       updated_tasks = Task.all
       render json: { tasks: updated_tasks }, status: :ok
