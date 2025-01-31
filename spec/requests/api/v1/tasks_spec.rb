@@ -2,12 +2,13 @@ require 'rails_helper'
 
 RSpec.describe Api::V1::TasksController, type: :request do
   describe 'GET /api/v1/tasks' do
-    let!(:tasks) { create_list(:task, 3) }
+    let!(:_archived_tasks) { create_list(:task, 2, archived: false) }
+    let!(:_unarchived_task) { create(:task, archived: true) }
 
-    it 'タスクのリストを返す' do
+    it 'アーカイブされていないタスクのリストを返す' do
       get api_v1_tasks_path
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)['tasks'].size).to eq(3)
+      expect(JSON.parse(response.body)['tasks'].size).to eq(2)
     end
   end
 
