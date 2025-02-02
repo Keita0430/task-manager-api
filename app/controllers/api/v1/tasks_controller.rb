@@ -31,7 +31,7 @@ class Api::V1::TasksController < ApplicationController
 
       Task.reorder_tasks_after_removal(task)
 
-      updated_tasks = Task.all
+      updated_tasks = Task.all.where(archived: false)
       render json: { tasks: updated_tasks }, status: :ok
     end
   rescue ActiveRecord::RecordNotFound => e
