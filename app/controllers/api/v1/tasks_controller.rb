@@ -47,7 +47,7 @@ class Api::V1::TasksController < ApplicationController
 
     Task.reorder_tasks(task, new_status, new_position)
 
-    tasks = Task.all
+    tasks = Task.all.where(archived: false)
     render json: { tasks: tasks }, status: :ok
   rescue ActiveRecord::RecordNotFound => e
     render json: { errors: e.message }, status: :not_found
