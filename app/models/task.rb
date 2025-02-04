@@ -4,9 +4,9 @@ class Task < ApplicationRecord
   enum :status, { todo: 0, in_progress: 1, done: 2, pending: 3 }, validate: true
 
   def self.reorder_tasks(task, new_status, new_position)
-    ActiveRecord::Base.transaction do
-      Task.validate_status!(new_status)
+    Task.validate_status!(new_status)
 
+    ActiveRecord::Base.transaction do
       # 同じステータス内で順番を入れ替える場合
       if task.status == new_status
         reorder_within_same_status(new_position, new_status, task)
@@ -14,7 +14,6 @@ class Task < ApplicationRecord
         # 異なるステータスに移動する場合
         reorder_across_different_status(new_position, new_status, task)
       end
-
       # 移動したタスクのステータスと位置を更新
       task.update!(status: new_status, position: new_position)
     end
@@ -27,6 +26,11 @@ class Task < ApplicationRecord
     Task.where(status: task.status).where("position > ?", task.position).each do |other_task|
       other_task.update!(position: other_task.position - 1)
     end
+  end
+
+  def move_unarchived_task_to_end
+    last_position = Task.where(status: status, archived: false).count
+    update!(position: last_position)
   end
 
   private

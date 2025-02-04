@@ -134,7 +134,7 @@ RSpec.describe Task, type: :model do
     let!(:task2) { Task.create!(title: 'Task 2', status: :todo, position: 2) }
     let!(:task3) { Task.create!(title: 'Task 3', status: :todo, position: 3) }
 
-    context 'タスクを削除した場合　' do
+    context 'タスクを削除した場合' do
       it '同じステータスを持つタスクのポジションを再計算する' do
         Task.reorder_tasks_after_removal(task1)
 
@@ -144,6 +144,28 @@ RSpec.describe Task, type: :model do
         expect(task2.position).to eq(1)
         expect(task3.position).to eq(2)
       end
+    end
+  end
+
+  describe '#move_unarchived_task_to_end' do
+    let!(:task1) { Task.create!(title: 'Task 1', status: :todo, position: 10, archived: true) }
+    let!(:task2) { Task.create!(title: 'Task 2', status: :todo, position: 1, archived: false) }
+    let!(:task3) { Task.create!(title: 'Task 3', status: :todo, position: 2, archived: false) }
+
+    before do
+      task1.update(archived: false)
+    end
+
+    it 'アーカイブ解除したタスクがリストの最後に移動する' do
+      task1.move_unarchived_task_to_end
+
+      task1.reload
+      task2.reload
+      task3.reload
+
+      expect(task1.position).to eq(3)
+      expect(task2.position).to eq(1)
+      expect(task3.position).to eq(2)
     end
   end
 end
